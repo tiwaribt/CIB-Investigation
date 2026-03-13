@@ -1,0 +1,8 @@
+{
+  "name": "FID Intelligence Dashboard",
+  "description": "Federal Intelligence Database - Advanced Biometric Analysis & OSINT Intelligence System",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

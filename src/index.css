@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-intel-blue: #0A192F;
+  --color-intel-cyan: #64FFDA;
+  --color-intel-red: #FF4D4D;
+  --color-intel-border: #112240;
+}
+
+@layer base {
+  body {
+    @apply bg-[#020C1B] text-[#CCD6F6] font-sans overflow-x-hidden;
+  }
+}
+
+/* Intelligence Technical Dashboard Styles */
+.intel-grid {
+  background-image: 
+    linear-gradient(to right, rgba(100, 255, 218, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(100, 255, 218, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.intel-card {
+  @apply bg-[#112240] border border-[#233554] rounded-sm shadow-2xl relative overflow-hidden;
+  box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
+}
+
+.intel-card::before {
+  content: '';
+  @apply absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#64FFDA] to-transparent opacity-30;
+}
+
+.intel-header {
+  @apply border-b border-[#233554] px-4 py-3 flex items-center justify-between bg-[#0A192F]/80 backdrop-blur-md;
+}
+
+.intel-label {
+  @apply text-[10px] uppercase tracking-[0.3em] font-bold text-[#8892B0];
+}
+
+.intel-value {
+  @apply font-mono text-xs text-[#64FFDA];
+}
+
+.btn-intel {
+  @apply bg-[#112240] border border-[#64FFDA]/20 text-[#8892B0] px-4 py-2 rounded-sm text-[10px] uppercase tracking-widest font-bold hover:bg-[#233554] hover:text-[#64FFDA] hover:border-[#64FFDA]/50 transition-all active:scale-95;
+}
+
+.btn-intel-active {
+  @apply bg-[#64FFDA]/10 border-[#64FFDA]/50 text-[#64FFDA] shadow-[0_0_15px_rgba(100,255,218,0.1)];
+}
+
+.input-intel {
+  @apply w-full bg-[#020C1B] border border-[#233554] rounded-sm px-3 py-2 text-sm text-[#CCD6F6] focus:outline-none focus:border-[#64FFDA]/50 transition-all font-mono placeholder:text-[#495670];
+}
+
+/* Classified Watermark */
+.watermark {
+  @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[15vw] font-black text-[#64FFDA]/[0.02] pointer-events-none select-none uppercase -rotate-12 z-0;
+}
+
+/* CRT Effect */
+.crt::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 118, 0.02));
+  z-index: 100;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Scanning Animation */
+@keyframes scan {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.scan-line {
+  @apply absolute left-0 w-full h-[1px] bg-[#64FFDA] shadow-[0_0_20px_#64FFDA] z-10 pointer-events-none opacity-50;
+  animation: scan 3s ease-in-out infinite;
+}
+
+/* HUD elements */
+.hud-border {
+  @apply absolute w-4 h-4 border-[#64FFDA]/30;
+}
+.hud-tl { @apply top-2 left-2 border-t-2 border-l-2; }
+.hud-tr { @apply top-2 right-2 border-t-2 border-r-2; }
+.hud-bl { @apply bottom-2 left-2 border-b-2 border-l-2; }
+.hud-br { @apply bottom-2 right-2 border-b-2 border-r-2; }
+
+/* Glitch Effect */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 #ff00c1;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+  animation: glitch-anim2 1s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(31px, 9999px, 94px, 0); }
+  20% { clip: rect(62px, 9999px, 42px, 0); }
+  40% { clip: rect(16px, 9999px, 78px, 0); }
+  60% { clip: rect(87px, 9999px, 12px, 0); }
+  80% { clip: rect(43px, 9999px, 56px, 0); }
+  100% { clip: rect(9px, 9999px, 34px, 0); }
+}
+
+@keyframes glitch-anim2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); }
+  20% { clip: rect(12px, 9999px, 56px, 0); }
+  40% { clip: rect(89px, 9999px, 12px, 0); }
+  60% { clip: rect(45px, 9999px, 78px, 0); }
+  80% { clip: rect(23px, 9999px, 45px, 0); }
+  100% { clip: rect(78px, 9999px, 12px, 0); }
+}
+
