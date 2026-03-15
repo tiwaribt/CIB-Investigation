@@ -21,7 +21,8 @@ import {
   Save,
   Trash2,
   AlertTriangle,
-  Scan
+  Scan,
+  Radio
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'motion/react';
@@ -34,7 +35,9 @@ import {
   textToSpeech, 
   generateText,
   compareFaces,
-  criminalRecordSearch
+  criminalRecordSearch,
+  geointSearch,
+  cyberTrace
 } from './services/gemini';
 import { extractTextFromPDF, fileToBase64 } from './utils/fileProcessing';
 
@@ -42,7 +45,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type Tab = 'face' | 'osint' | 'compare' | 'records' | 'database' | 'cases' | 'translate';
+type Tab = 'face' | 'osint' | 'compare' | 'records' | 'database' | 'cases' | 'translate' | 'geoint' | 'cyber' | 'comms';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('face');
@@ -107,7 +110,7 @@ export default function App() {
       });
       fetchSuspects();
       // Using a custom notification would be better, but for now just updating the text
-      console.log("Subject indexed to FID Database.");
+      console.log("Subject indexed to CIB Database.");
     } catch (error) {
       console.error(error);
     }
@@ -192,7 +195,7 @@ export default function App() {
                 <Shield className="text-[#64FFDA]" size={24} />
               </div>
               <div>
-                <h1 className="font-black tracking-tighter text-xl text-white leading-none">FID</h1>
+                <h1 className="font-black tracking-tighter text-xl text-white leading-none">CIB</h1>
                 <span className="text-[8px] uppercase tracking-[0.4em] text-[#64FFDA]/60 font-bold">Intelligence</span>
               </div>
             </div>
@@ -213,6 +216,9 @@ export default function App() {
               <span className="intel-label px-2 opacity-50">Intelligence</span>
             </div>
             <NavButton icon={<Search size={18} />} label="Digital Trace" active={activeTab === 'osint'} onClick={() => setActiveTab('osint')} />
+            <NavButton icon={<Globe size={18} />} label="GEOINT Satellite" active={activeTab === 'geoint'} onClick={() => setActiveTab('geoint')} />
+            <NavButton icon={<Activity size={18} />} label="Cyber Trace" active={activeTab === 'cyber'} onClick={() => setActiveTab('cyber')} />
+            <NavButton icon={<Radio size={18} />} label="Satellite Comms" active={activeTab === 'comms'} onClick={() => setActiveTab('comms')} />
             <NavButton icon={<FileSearch size={18} />} label="Agency Records" active={activeTab === 'records'} onClick={() => setActiveTab('records')} />
             
             <div className="pt-6 pb-2">
@@ -259,6 +265,9 @@ export default function App() {
                   {activeTab === 'face' && 'Biometric Identification Protocol'}
                   {activeTab === 'compare' && 'Forensic Comparison Matrix'}
                   {activeTab === 'osint' && 'Digital Footprint Analysis'}
+                  {activeTab === 'geoint' && 'Geospatial Satellite Intelligence'}
+                  {activeTab === 'cyber' && 'Cyber Network Trace'}
+                  {activeTab === 'comms' && 'Satellite Uplink Communication'}
                   {activeTab === 'records' && 'Federal Record Index'}
                   {activeTab === 'database' && 'Subject Registry Access'}
                   {activeTab === 'cases' && 'Investigation Management'}
@@ -298,6 +307,9 @@ export default function App() {
                 {activeTab === 'records' && <RecordsView onSearch={handleCriminalSearch} loading={loading} />}
                 {activeTab === 'database' && <DatabaseView suspects={suspects} />}
                 {activeTab === 'cases' && <CasesView cases={cases} onCreate={createCase} />}
+                {activeTab === 'geoint' && <GeointView onSearch={async (q) => { setLoading(true); const d = await geointSearch(q); setResult(d); setLoading(false); }} loading={loading} />}
+                {activeTab === 'cyber' && <CyberView onSearch={async (q) => { setLoading(true); const d = await cyberTrace(q); setResult(d); setLoading(false); }} loading={loading} />}
+                {activeTab === 'comms' && <CommsView />}
                 {activeTab === 'translate' && <TranslateView onTranslate={async (t, l) => { setLoading(true); const d = await translateAndSpeak(t, l); setResult(d); if (d.audio) playAudio(d.audio); setLoading(false); }} loading={loading} />}
 
                 {/* Results Display */}
@@ -370,7 +382,7 @@ export default function App() {
                         </div>
                         <div className="p-8 font-mono text-xs leading-relaxed text-[#8892B0] whitespace-pre-wrap bg-[#020C1B]/50 min-h-[200px]">
                           <div className="mb-4 text-[#64FFDA]/40 text-[10px] border-b border-[#233554] pb-2">
-                            DECRYPTION_COMPLETE // SOURCE: FID_CORE // TIMESTAMP: {new Date().toISOString()}
+                            DECRYPTION_COMPLETE // SOURCE: CIB_CORE // TIMESTAMP: {new Date().toISOString()}
                           </div>
                           {result.text || result.error}
                         </div>
@@ -700,6 +712,168 @@ function CasesView({ cases, onCreate }: { cases: any[], onCreate: (t: string, d:
             <p className="intel-label tracking-[0.4em]">No Active Investigations Found</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function GeointView({ onSearch, loading }: { onSearch: (q: string) => void, loading: boolean }) {
+  const [q, setQ] = useState('');
+  return (
+    <div className="intel-card p-10 bg-[#0A192F]/40">
+      <div className="flex gap-6">
+        <div className="flex-1 relative">
+          <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-[#495670]" size={18} />
+          <input 
+            type="text" 
+            value={q} 
+            onChange={(e) => setQ(e.target.value)} 
+            placeholder="Enter Location, Coordinates, or Landmark..." 
+            className="input-intel pl-12 py-4"
+          />
+        </div>
+        <button onClick={() => onSearch(q)} disabled={loading} className="btn-intel px-10">
+          Sync Satellite
+        </button>
+      </div>
+      <div className="mt-10 grid grid-cols-2 gap-6">
+        <div className="p-5 bg-[#020C1B] border border-[#233554] rounded-sm">
+          <span className="intel-label block mb-2 opacity-50">Satellite Constellation</span>
+          <span className="intel-value text-sm">CIB-GEO-EYE-09</span>
+        </div>
+        <div className="p-5 bg-[#020C1B] border border-[#233554] rounded-sm">
+          <span className="intel-label block mb-2 opacity-50">Ground Resolution</span>
+          <span className="intel-value text-sm">0.15m / PIXEL</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CyberView({ onSearch, loading }: { onSearch: (q: string) => void, loading: boolean }) {
+  const [q, setQ] = useState('');
+  return (
+    <div className="intel-card p-10 bg-[#0A192F]/40">
+      <div className="flex gap-6">
+        <div className="flex-1 relative">
+          <Activity className="absolute left-4 top-1/2 -translate-y-1/2 text-[#495670]" size={18} />
+          <input 
+            type="text" 
+            value={q} 
+            onChange={(e) => setQ(e.target.value)} 
+            placeholder="Enter IP Address, Domain, or MAC..." 
+            className="input-intel pl-12 py-4"
+          />
+        </div>
+        <button onClick={() => onSearch(q)} disabled={loading} className="btn-intel px-10">
+          Trace Packet
+        </button>
+      </div>
+      <div className="mt-10 grid grid-cols-3 gap-6">
+        <div className="p-5 bg-[#020C1B] border border-[#233554] rounded-sm">
+          <span className="intel-label block mb-2 opacity-50">Node Status</span>
+          <span className="intel-value text-sm">MONITORING</span>
+        </div>
+        <div className="p-5 bg-[#020C1B] border border-[#233554] rounded-sm">
+          <span className="intel-label block mb-2 opacity-50">Packet Depth</span>
+          <span className="intel-value text-sm">LAYER_7</span>
+        </div>
+        <div className="p-5 bg-[#020C1B] border border-[#233554] rounded-sm">
+          <span className="intel-label block mb-2 opacity-50">Firewall Bypass</span>
+          <span className="intel-value text-sm text-[#64FFDA]">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CommsView() {
+  const [mode, setMode] = useState<'sms' | 'call'>('sms');
+  const [number, setNumber] = useState('');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'connecting' | 'transmitting' | 'success'>('idle');
+
+  const handleAction = () => {
+    setStatus('connecting');
+    setTimeout(() => {
+      setStatus('transmitting');
+      setTimeout(() => {
+        setStatus('success');
+        setTimeout(() => setStatus('idle'), 3000);
+      }, 2000);
+    }, 1500);
+  };
+
+  return (
+    <div className="intel-card p-10 bg-[#0A192F]/40">
+      <div className="flex gap-4 mb-10 border-b border-[#233554] pb-6">
+        <button 
+          onClick={() => setMode('sms')} 
+          className={cn("px-6 py-2 text-[10px] font-black tracking-widest uppercase transition-all", mode === 'sms' ? "text-[#64FFDA] border-b-2 border-[#64FFDA]" : "text-[#495670]")}
+        >
+          Satellite SMS
+        </button>
+        <button 
+          onClick={() => setMode('call')} 
+          className={cn("px-6 py-2 text-[10px] font-black tracking-widest uppercase transition-all", mode === 'call' ? "text-[#64FFDA] border-b-2 border-[#64FFDA]" : "text-[#495670]")}
+        >
+          Satellite Call
+        </button>
+      </div>
+
+      <div className="max-w-xl mx-auto space-y-8">
+        <div className="space-y-2">
+          <span className="intel-label opacity-50">Target Frequency / Number</span>
+          <div className="relative">
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#495670]" size={18} />
+            <input 
+              type="text" 
+              value={number} 
+              onChange={(e) => setNumber(e.target.value)} 
+              placeholder="+1 (XXX) XXX-XXXX" 
+              className="input-intel pl-12 py-4"
+            />
+          </div>
+        </div>
+
+        {mode === 'sms' && (
+          <div className="space-y-2">
+            <span className="intel-label opacity-50">Encrypted Payload</span>
+            <textarea 
+              value={message} 
+              onChange={(e) => setMessage(e.target.value)} 
+              placeholder="Enter secure message..." 
+              className="input-intel min-h-[120px] p-4 resize-none"
+            />
+          </div>
+        )}
+
+        <button 
+          onClick={handleAction} 
+          disabled={status !== 'idle'} 
+          className="btn-intel w-full py-6 flex items-center justify-center gap-4"
+        >
+          {status === 'idle' && (
+            <>
+              <Radio size={20} />
+              <span>{mode === 'sms' ? 'INITIATE BURST TRANSMISSION' : 'ESTABLISH SATELLITE UPLINK'}</span>
+            </>
+          )}
+          {status === 'connecting' && <span className="animate-pulse">ACQUIRING SATELLITE...</span>}
+          {status === 'transmitting' && <span className="animate-pulse">TRANSMITTING VIA CIB-SAT-04...</span>}
+          {status === 'success' && <span className="text-[#64FFDA]">TRANSMISSION SUCCESSFUL</span>}
+        </button>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-[#020C1B] border border-[#233554] rounded-sm">
+            <span className="intel-label block mb-1 opacity-50">Encryption</span>
+            <span className="intel-value text-[10px]">AES-256-GCM</span>
+          </div>
+          <div className="p-4 bg-[#020C1B] border border-[#233554] rounded-sm">
+            <span className="intel-label block mb-1 opacity-50">Uplink Latency</span>
+            <span className="intel-value text-[10px]">24ms</span>
+          </div>
+        </div>
       </div>
     </div>
   );

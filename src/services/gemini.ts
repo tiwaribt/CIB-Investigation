@@ -129,6 +129,41 @@ export async function criminalRecordSearch(name: string, details: string) {
   };
 }
 
+export async function geointSearch(query: string) {
+  const response = await ai.models.generateContent({
+    model: geminiModel,
+    contents: `GEOINT_SATELLITE_PROTOCOL: Execute a geospatial intelligence sweep for: ${query}. 
+    Analyze satellite imagery, mapping data, and local infrastructure. 
+    Identify key landmarks, strategic points, and any recent changes in the area. 
+    Provide a detailed tactical report.`,
+    config: {
+      tools: [{ googleMaps: {} }],
+      systemInstruction: "You are a Geospatial Intelligence Analyst. Your reports focus on terrain, infrastructure, and strategic locations.",
+    },
+  });
+  return {
+    text: response.text,
+    grounding: response.candidates?.[0]?.groundingMetadata?.groundingChunks,
+  };
+}
+
+export async function cyberTrace(query: string) {
+  const response = await ai.models.generateContent({
+    model: geminiModel,
+    contents: `CYBER_NETWORK_TRACE: Execute a technical network analysis for the target: ${query}. 
+    Identify IP origins, domain registrations, hosting infrastructure, and any linked malicious activity or vulnerabilities. 
+    Provide a technical breakdown of the network footprint.`,
+    config: {
+      tools: [{ googleSearch: {} }],
+      systemInstruction: "You are a Cyber Intelligence Specialist. Your reports are highly technical and focus on network infrastructure and digital security.",
+    },
+  });
+  return {
+    text: response.text,
+    grounding: response.candidates?.[0]?.groundingMetadata?.groundingChunks,
+  };
+}
+
 export async function textToSpeech(text: string) {
   const response = await ai.models.generateContent({
     model: ttsModel,

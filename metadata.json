@@ -1,8 +1,9 @@
 {
-  "name": "FID Intelligence Dashboard",
-  "description": "Federal Intelligence Database - Advanced Biometric Analysis & OSINT Intelligence System",
+  "name": "CIB Intelligence",
+  "description": "Central Investigation Bureau - Global Intelligence & Multi-Agency Forensic System (FBI, CBI, RAW Protocols)",
   "requestFramePermissions": [
     "camera",
-    "microphone"
+    "microphone",
+    "geolocation"
   ]
 }
